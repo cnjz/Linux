@@ -1,0 +1,74 @@
+這裡介紹各種在 Linux 下將 PDF 檔轉為圖片檔的指令工具，並提供實用的自動化指令稿，解決大量轉檔問題。
+
+最近我手上有非常大量的 PDF 檔案需要放在網頁上讓人瀏覽，但是因為有些 PDF 檔案非常大，如果直接放在網頁上觀看的話，使用者會需要等待整個 PDF 檔都下載完成後，才能觀看，效率不是很好。
+
+另外我也希望的這些 PDF 檔案有基本的防拷保護，讓人可以自由觀看，但不要輕易就全部下載回去。
+
+考量效率以及防考功能，最簡單的作法應該就是把 PDF 的每一頁都轉成圖片檔，放在網頁中使用一般的 JavaScript 圖庫工具來處理，這樣使用者每次只需要下載單頁的圖檔，速度會比較快，若使用者要下載，就只能下載單頁的圖片（雖然對於高手沒差，不過至少有基本的防護）。
+
+ 
+以下我整理了幾種 Linux 系統上可以把 PDF 檔轉為圖片檔的指令工具，並且提供自動化的指令稿，可以自動處理大量的 PDF 轉檔工作。
+ImageMagick
+ImageMagick 是一套功能強大的圖片處理工具箱，若要將 PDF 檔案轉為圖檔，可以使用其 convert 轉檔指令：
+
+# 使用 ImageMagick 將 PDF 檔轉為 JPG 圖片檔
+convert -density 300 input.pdf -quality 90 output.jpg
+這裡的 -density 參數是指定輸出圖檔的每英寸點數（dpi），300 是普通的品質，若想要解析度高一點，可以設定為 400 或 600。而 -quality 參數是指定圖片壓縮層級。
+
+執行後，ImageMagick 就會以使用者指定的輸出檔名，再加上自動的編號來產生每一頁的圖檔名稱，把 PDF 的每一頁各儲存成一張圖檔。轉出來的結果會像這樣：
+
+
+ImageMagick 將 PDF 轉 JPG 圖檔
+
+輸出圖檔格式
+ImageMagick 支援許多種輸出圖檔格式，若要輸出其他格式的圖檔，就直接更改輸出檔名的副檔名即可：
+
+# 將 PDF 檔轉為 PNG 圖片檔案
+convert -density 300 input.pdf -quality 90 output.png
+選擇部分頁面
+如果只想要轉換 PDF 檔中的部分頁面，可以使用中括號來指定頁碼（從 0 開始算起）：
+
+# 只抽取 input.pdf 的第五頁，轉為 JPG 檔
+convert -density 300 input.pdf[4] -quality 90 output.jpg
+
+# 只抽取 input.pdf 的前三頁，轉為 JPG 檔
+convert -density 300 input.pdf[0-2] -quality 90 output.jpg
+去除白色邊緣
+一般的 PDF 文件一定都會有周圍的白邊，如果不想讓周圍的空白區域佔去太多版面，可以加上 -trim 讓 ImageMagick 自動把白邊去除：
+
+# 自動去除白色邊緣
+convert -density 300 input.pdf -quality 90 -trim output.jpg
+產生的結果會類似這樣：
+
+
+去除圖片白邊
+
+ImageMagick 去除白邊的方法是以最角落的像素顏色為準，凡是跟最角落像素的顏色相同的邊緣就自動去除，如果想要放寬判斷邊緣的標準，可以使用 -fuzz 來指定放寬的門檻值。
+
+裁切區域
+若要將轉出來的圖片進行裁切，取出部份的區域，可以加上 -extract 參數，並指定區域的大小與位置，以下是一個範例：
+
+# 裁切一個寬度為 960 像素、高度為 540 像素的區域，
+# 此區域距離左邊界 180 像素、距離上邊界 220 像素
+convert -density 300 -extract 960x540+180+220 input.pdf output.jpg
+輸出的結果會像這樣：
+
+
+裁切的區域
+
+黑色背景問題
+有時候使用 convert 將 PDF 文件轉為 JPG 圖檔時，會產生黑色的背景，類似這樣：
+
+
+ImageMagick 將 PDF 轉 JPG 產生黑色背景
+
+若遇到這樣的問題，可以加上 -alpha remove 或是 -alpha flatten 參數即可解決：
+
+# 解決 PDF 轉 JPG 產生黑色背景問題（方法一）
+convert -density 300 input.pdf -quality 90 -alpha remove output.jpg
+
+# 解決 PDF 轉 JPG 產生黑色背景問題（方法二）
+convert -density 300 input.pdf -quality 90 -alpha flatten output.jpg
+ImageMagick 雖然功能相當齊全，不過它的處理速度非常慢，若有處理速度上的考量，可以考慮下面要介紹的幾種轉換工具，請繼續閱讀下一頁。
+
+https://blog.gtwang.org/linux/linux-convert-pdf-to-image-commands-tutorial-examples/
