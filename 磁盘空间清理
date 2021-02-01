@@ -1,0 +1,29 @@
+1、如何清除 APT 缓存？你只需使用这个 apt-get 命令选项：
+
+sudo apt-get clean
+
+https://linux.cn/article-12787-1.html
+
+
+
+2、Linux 服务器 /tmp 目录的自动清理
+使用了快十年的 Linux 服务器我今天才知道原来在某些发行版里，tmp 目录原来只有在启动的时候才会被清理……如此后知后觉我也是醉了，不过还好今时今日发现了此问题，并且也找到了解决方法，也算亡羊补牢。
+
+从 serverfault.com 上获取的资料，不同的 Linux 发行版其实对 /tmp 目录的清理方式有所不同：
+
+在 Debian-like 的系统，启动的时候才会清理 (规则定义在 /etc/default/rcS)
+在 RedHat-like 的系统，按文件存在时间定时清理 (RHEL6 规则定义在 /etc/cron.daily/tmpwatch; RHEL7 以及 RedHat-like with systemd 规则定义在 /usr/lib/tmpfiles.d/tmp.conf, 通过 systemd-tmpfiles-clean.service 服务调用)
+在 CentOS 里，也是按文件存在时间清理的 (通过 crontab 的配置 /etc/cron.daily 定时执行 tmpwatch 来实现)
+在 Gentoo 里也是启动清理，规则定义在 /etc/conf.d/bootmisc，大 Gentoo 就是不走寻常路
+对于那些只能开机清理临时文件的发行版，如果作为服务器，这种不重启就对临时文件目录的垃圾不问不管的做事风格实在是很不靠谱。不过从上面其他发行版大家估计也会发现，解决此问题的关键就在于 tmpwatch 和定时任务的配合使用。
+
+tmpwatch 是专门用于解决“删除 xxx 天没有被访问/修改过的文件”这样需求的命令。使用方式也极其简单：
+
+tmpwatch 30d /tmp/
+注意在 Ubuntu 的 apt-get 是无法直接安装 tmpwatch 的，tmpwatch 在 Ubuntu 里叫 tmpreaper：
+
+sudo apt-get install tmpreaper
+sudo tmpreaper 30d /tmp
+
+
+https://www.chrisyue.com/linux-server-tmp-dir-auto-clean.html
