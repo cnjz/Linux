@@ -27,3 +27,10 @@ sudo tmpreaper 30d /tmp
 
 
 https://www.chrisyue.com/linux-server-tmp-dir-auto-clean.html
+
+
+
+当前目录大小：
+df -h
+sudo du /var/cache/* | sort -n
+sudo du -h --max-depth=1 ./
